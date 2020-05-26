@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Private Chat</string>
+    <string name="message">Введите сообщение...</string>
+    <string name="send">Отправить</string>
+</resources>
