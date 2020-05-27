@@ -1,11 +1,13 @@
 package com.exemple.chatapp;
 
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.util.Consumer;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class MainActivity extends AppCompatActivity {
@@ -14,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     EditText userInput;
     RecyclerView chatWindow;
     MessageController controller;
+    Server server;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,12 +41,28 @@ public class MainActivity extends AppCompatActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               String text =  userInput.getText().toString();
+                String text = userInput.getText().toString();
                 controller.addMessage(
-                        new MessageController.Message(text, "Иван", true)
+                        new MessageController.Message(text, "Ванек", true)
                 );
+                server.sendMessage(text);
                 userInput.setText("");
             }
         });
+
+        server = new Server(new Consumer<Pair<String, String>>() {
+            @Override
+            public void accept(final Pair<String, String> p) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        controller.addMessage(
+                                new MessageController.Message(p.second, p.first, false)
+                        );
+                    }
+                });
+            }
+        });
+        server.connect();
     }
 }
