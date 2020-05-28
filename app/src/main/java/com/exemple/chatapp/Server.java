@@ -36,10 +36,6 @@ public class Server {
             public void onOpen(ServerHandshake handshakedata) {
                 Log.i("SERVER", "Connection to server is open");
 
-                String name = Protocol.packName(new Protocol.UserName("Ванек"));
-//                String name = "3{ name: \"Ванек\"}";
-                Log.i("SERVER", "Send my name: " + name);
-                client.send(name);
             }
 
             @Override
@@ -73,8 +69,14 @@ public class Server {
         if (name == null) {
             name = "No name";
         }
+        String text = m.getEncodedText();
+        try {
+            text = Crypto.decrypt(text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         onMessageReceived.accept(
-                new Pair<String, String>(name, m.getEncodedText())
+                new Pair<String, String>(name, text)
         );
     }
 
@@ -91,10 +93,23 @@ public class Server {
         if (client != null || !client.isOpen()) {
             return;
         }
+        try {
+            message = Crypto.encrypt(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         Protocol.Message m = new Protocol.Message("Привет!");
         m.setReceiver(Protocol.GROUP_CHAT);
         String pM = Protocol.packMessage(m);
         Log.i("SERVER", "Send message: " + pM);
         client.send(pM);
     }
+
+    public void sendUserName(String name) {
+        String myName = Protocol.packName(new Protocol.UserName("Ванек"));
+        Log.i("SERVER", "Sending my name to server: " + myName);
+        client.send(myName);
+    }
+
+
 }

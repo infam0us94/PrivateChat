@@ -1,11 +1,13 @@
 package com.exemple.chatapp;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Consumer;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +19,23 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView chatWindow;
     MessageController controller;
     Server server;
+    String userName;
+
+    public void getUserName() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Введите свое имя");
+        final EditText nameInput = new EditText(this);
+        builder.setView(nameInput);
+        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                userName = nameInput.getText().toString();
+                server.sendUserName(userName);
+                //отослать на сервер
+            }
+        });
+        builder.show();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String text = userInput.getText().toString();
                 controller.addMessage(
-                        new MessageController.Message(text, "Ванек", true)
+                        new MessageController.Message(text, userName, true)
                 );
                 server.sendMessage(text);
                 userInput.setText("");
@@ -64,5 +83,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         server.connect();
+        getUserName();
     }
 }
